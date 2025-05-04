@@ -1,0 +1,38 @@
+# Môi trường ảo (Virtual Environment)
+venv/
+env/
+.env/
+
+# Tệp bytecode Python
+*.pyc
+*.pyo
+__pycache__/
+
+# Tệp cấu hình của IDE (Integrated Development Environment)
+.idea/
+.vscode/
+
+# Tệp log
+*.log
+
+# Tệp hệ thống (macOS, Windows)
+.DS_Store
+Thumbs.db
+
+# Tệp cấu hình môi trường (dotenv)
+.env
+
+# Tệp hoặc thư mục phụ thuộc của pip
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Tệp hoặc thư mục build
+build/
+dist/
+*.egg-info/
+
+# Tệp cấu hình của pytest
+.pytest_cache/
+
+# Tệp database của SQLite (nếu có)
+*.sqlite3

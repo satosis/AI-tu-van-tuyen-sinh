@@ -1,0 +1,142 @@
+"""
+Script để xử lý và nạp dữ liệu từ các file PDF vào ChromaDB.
+"""
+import os
+import logging
+import argparse
+from pathlib import Path
+from typing import List, Dict, Any
+
+# Thêm đường dẫn gốc vào sys.path
+import sys
+
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
+from app.config import RAW_DATA_DIR, CHROMA_PERSIST_DIRECTORY, CHROMA_COLLECTION_NAME
+from app.utils.data_loader import load_all_pdfs, create_document_chunks
+from app.utils.text_splitter import create_smart_chunks, enrich_chunks_with_metadata
+from app.vectordb.chroma_client import ChromaDBClient
+
+# Cấu hình logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('ingest.log')
+    ]
+)
+
+logger = logging.getLogger(__name__)
+
+
+def ingest_pdfs(input_dir: str = None,
+                persist_directory: str = CHROMA_PERSIST_DIRECTORY,
+                collection_name: str = CHROMA_COLLECTION_NAME,
+                recreate: bool = False) -> None:
+    """
+    Xử lý và nạp dữ liệu từ các file PDF vào ChromaDB.
+
+    Args:
+        input_dir (str, optional): Thư mục chứa các file PDF. Mặc định là RAW_DATA_DIR.
+        persist_directory (str, optional): Thư mục lưu dữ liệu ChromaDB. Mặc định là CHROMA_PERSIST_DIRECTORY.
+        collection_name (str, optional): Tên collection. Mặc định là CHROMA_COLLECTION_NAME.
+        recreate (bool, optional): Có tạo lại collection không. Mặc định là False.
+    """
+    try:
+        if input_dir is None:
+            input_dir = RAW_DATA_DIR
+
+        logger.info(f"Bắt đầu quá trình nạp dữ liệu từ {input_dir}")
+
+        # Khởi tạo client ChromaDB
+        chroma_client = ChromaDBClient(persist_directory, collection_name)
+
+        # Nếu recreate và collection đã tồn tại, xóa collection cũ
+        if recreate:
+            logger.info(f"Xóa collection cũ: {collection_name}")
+            chroma_client.delete_collection()
+
+            # Tạo lại client với collection mới
+            chroma_client = ChromaDBClient(persist_directory, collection_name)
+
+        # Kiểm tra số lượng tài liệu đã có
+        stats = chroma_client.get_collection_stats()
+        logger.info(f"Thông tin collection hiện tại: {stats}")
+
+        # Đọc tất cả các file PDF
+        pdf_files = load_all_pdfs(input_dir)
+        if not pdf_files:
+            logger.warning(f"Không tìm thấy file PDF trong thư mục {input_dir}")
+            return
+
+        logger.info(f"Đã đọc {len(pdf_files)} file PDF")
+
+        # Xử lý từng file và tạo chunks
+        all_chunks = []
+
+        for file_name, content in pdf_files.items():
+            logger.info(f"Đang xử lý file: {file_name}")
+
+            # Tạo chunks thông minh
+            chunks = create_smart_chunks(content)
+
+            # Làm giàu chunks với metadata
+            enriched_chunks = enrich_chunks_with_metadata(chunks, file_name)
+
+            all_chunks.extend(enriched_chunks)
+
+        logger.info(f"Đã tạo tổng cộng {len(all_chunks)} chunks từ {len(pdf_files)} file PDF")
+
+        # Thêm chunks vào ChromaDB
+        chroma_client.add_documents(all_chunks)
+
+        # Kiểm tra sau khi thêm
+        stats_after = chroma_client.get_collection_stats()
+        logger.info(f"Thông tin collection sau khi thêm: {stats_after}")
+
+        logger.info("Đã hoàn thành quá trình nạp dữ liệu thành công")
+
+    except Exception as e:
+        logger.error(f"Lỗi khi nạp dữ liệu: {str(e)}")
+        raise
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Nạp dữ liệu PDF vào ChromaDB")
+
+    parser.add_argument(
+        "--input",
+        type=str,
+        default=None,
+        help="Thư mục chứa các file PDF"
+    )
+
+    parser.add_argument(
+        "--persist-dir",
+        type=str,
+        default=CHROMA_PERSIST_DIRECTORY,
+        help="Thư mục lưu dữ liệu ChromaDB"
+    )
+
+    parser.add_argument(
+        "--collection",
+        type=str,
+        default=CHROMA_COLLECTION_NAME,
+        help="Tên collection trong ChromaDB"
+    )
+
+    parser.add_argument(
+        "--recreate",
+        action="store_true",
+        help="Xóa collection cũ nếu đã tồn tại"
+    )
+
+    args = parser.parse_args()
+
+    ingest_pdfs(
+        input_dir=args.input,
+        persist_directory=args.persist_dir,
+        collection_name=args.collection,
+        recreate=args.recreate
+    )

@@ -1,0 +1,10 @@
+pip install langchain_groq
+pip install chromadb
+pip install scikit-learn
+pip install langchain
+pip install flask_cors
+pip install flask
+pip install langchain_community
+pip install sentence_transformers
+pip install streamlit
+pip install matplotlib

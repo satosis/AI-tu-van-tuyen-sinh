@@ -8,3 +8,4 @@ pip install langchain_community
 pip install sentence_transformers
 pip install streamlit
 pip install matplotlib
+pip install pypdf

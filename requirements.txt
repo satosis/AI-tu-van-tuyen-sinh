@@ -19,6 +19,7 @@ torch==2.7.0
 
 # Xử lý dữ liệu và tài liệu
 pypdf==3.17.1
+unstructured
 scikit-learn==1.6.1
 numpy==1.26.2
 pandas==2.1.3

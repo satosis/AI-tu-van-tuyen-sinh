@@ -26,8 +26,7 @@ LLM_MODEL = os.getenv("LLM_MODEL", "meta-llama/llama-4-scout-17b-16e-instruct")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
 
 # Database settings
-CHROMA_PERSIST_DIRECTORY = os.getenv("CHROMA_PERSIST_DIRECTORY", "./data/chroma_db")
-CHROMA_COLLECTION_NAME = os.getenv("CHROMA_COLLECTION_NAME", "admission_docs")
+FAISS_INDEX_PATH = os.getenv("FAISS_INDEX_PATH", "./data/faiss_index")
 
 # API settings
 BACKEND_HOST = os.getenv("BACKEND_HOST", "127.0.0.1")

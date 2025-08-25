@@ -8,7 +8,7 @@ from typing import Dict, Any
 
 from app.pipeline.router import get_semantic_router
 from app.pipeline.reflection import get_reflection
-from app.vectordb.chroma_client import get_chroma_client
+from app.vectordb.faiss_client import get_faiss_client
 from app.models.evaluation import get_evaluation_model
 
 logger = logging.getLogger(__name__)
@@ -19,7 +19,7 @@ api_bp = Blueprint('api', __name__, url_prefix='/api')
 # Lazy loading các thành phần
 router = None
 reflection = None
-chroma_client = None
+faiss_client = None
 evaluator = None
 
 
@@ -27,7 +27,7 @@ def lazy_init() -> None:
     """
     Khởi tạo lười các thành phần cần thiết.
     """
-    global router, reflection, chroma_client, evaluator
+    global router, reflection, faiss_client, evaluator
 
     try:
         if router is None:
@@ -36,8 +36,8 @@ def lazy_init() -> None:
         if reflection is None:
             reflection = get_reflection()
 
-        if chroma_client is None:
-            chroma_client = get_chroma_client()
+        if faiss_client is None:
+            faiss_client = get_faiss_client()
 
         if evaluator is None:
             evaluator = get_evaluation_model()
@@ -109,9 +109,9 @@ def chat() -> Dict[str, Any]:
 
 
 @api_bp.route('/collection/stats', methods=['GET'])
-def get_collection_stats() -> Dict[str, Any]:
+def get_index_stats() -> Dict[str, Any]:
     """
-    Lấy thông tin thống kê của collection.
+    Lấy thông tin thống kê của FAISS index.
 
     Returns:
         Dict[str, Any]: Thông tin thống kê
@@ -121,16 +121,16 @@ def get_collection_stats() -> Dict[str, Any]:
         lazy_init()
 
         # Lấy thông tin thống kê
-        stats = chroma_client.get_collection_stats()
+        stats = faiss_client.get_collection_stats()
 
         return jsonify(stats)
 
     except Exception as e:
-        logger.error(f"Lỗi khi lấy thông tin collection: {str(e)}")
+        logger.error(f"Lỗi khi lấy thông tin index: {str(e)}")
         logger.error(traceback.format_exc())
 
         return jsonify({
-            "error": "Đã xảy ra lỗi khi lấy thông tin collection.",
+            "error": "Đã xảy ra lỗi khi lấy thông tin index.",
             "details": str(e)
         }), 500
 

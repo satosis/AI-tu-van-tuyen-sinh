@@ -356,9 +356,9 @@ def send_chat_message(query: str, evaluate: bool = False) -> Dict[str, Any]:
             "details": str(e)
         }
 
-def get_collection_stats() -> Dict[str, Any]:
+def get_index_stats() -> Dict[str, Any]:
     """
-    Lấy thông tin thống kê của collection.
+    Lấy thông tin thống kê của FAISS index.
 
     Returns:
         Dict[str, Any]: Thông tin thống kê
@@ -369,7 +369,7 @@ def get_collection_stats() -> Dict[str, Any]:
         return response.json()
 
     except requests.RequestException as e:
-        logger.error(f"Lỗi khi lấy thông tin collection: {str(e)}")
+        logger.error(f"Lỗi khi lấy thông tin index: {str(e)}")
         return {"error": str(e)}
 
 def analyze_query(query: str, detailed: bool = False) -> Dict[str, Any]:
@@ -440,11 +440,11 @@ def render_sidebar() -> None:
     backend_status = "🟢 Hoạt động" if check_backend_health() else "🔴 Không hoạt động"
     st.sidebar.markdown(f"**Trạng thái backend:** {backend_status}")
 
-    # Lấy thông tin collection
-    collection_stats = get_collection_stats()
+    # Lấy thông tin index
+    collection_stats = get_index_stats()
 
     if "error" not in collection_stats:
-        st.sidebar.markdown(f"**Collection:** {collection_stats.get('name', 'N/A')}")
+        st.sidebar.markdown(f"**Index:** {collection_stats.get('name', 'N/A')}")
         st.sidebar.markdown(f"**Số lượng tài liệu:** {collection_stats.get('count', 0)}")
 
     # Tùy chọn
@@ -482,7 +482,7 @@ def render_sidebar() -> None:
     st.sidebar.markdown("""
     **Công nghệ sử dụng:**
     - LangChain cho xử lý RAG
-    - ChromaDB làm vector database
+    - FAISS làm vector database
     - Groq API với LLaMA-70B-8192
     - Hybrid search (cosine + BM25)
     """)

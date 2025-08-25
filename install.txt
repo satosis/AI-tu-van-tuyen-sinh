@@ -1,5 +1,5 @@
 pip install langchain_groq
-pip install chromadb
+pip install faiss-cpu
 pip install scikit-learn
 pip install langchain
 pip install flask_cors

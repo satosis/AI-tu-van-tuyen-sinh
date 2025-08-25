@@ -30,7 +30,7 @@ setup(
         "langchain-community==0.3.1",
         "langchain-groq==0.3.2",
         "langchain-text-splitters>=0.3.8",
-        "chromadb==0.4.22",
+        "faiss-cpu==1.7.4",
         "transformers==4.51.3",
         "sentence-transformers==4.1.0",
         "torch==2.7.0",

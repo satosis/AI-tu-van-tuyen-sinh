@@ -10,7 +10,7 @@ langchain-groq==0.3.2
 langchain-text-splitters>=0.3.8
 
 # Vector database
-chromadb==0.4.22
+faiss-cpu==1.7.4
 
 # Transformers / Embedding models
 transformers==4.51.3

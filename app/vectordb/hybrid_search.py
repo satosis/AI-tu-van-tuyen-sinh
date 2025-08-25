@@ -6,7 +6,7 @@ import re
 from typing import List, Dict, Any, Tuple
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
-from app.vectordb.chroma_client import get_chroma_client
+from app.vectordb.faiss_client import get_faiss_client
 from app.models.embedding import get_embedding_model
 
 logger = logging.getLogger(__name__)
@@ -24,8 +24,8 @@ class HybridSearch:
         logger.info("Khởi tạo hybrid search")
 
         try:
-            # Lấy client ChromaDB
-            self.chroma_client = get_chroma_client()
+            # Lấy client FAISS
+            self.faiss_client = get_faiss_client()
 
             # Lấy mô hình embedding
             self.embedding_model = get_embedding_model()
@@ -43,11 +43,11 @@ class HybridSearch:
 
     def _initialize_bm25(self) -> None:
         """
-        Khởi tạo BM25 (TF-IDF) từ dữ liệu trong ChromaDB.
+        Khởi tạo BM25 (TF-IDF) từ dữ liệu trong FAISS.
         """
         try:
-            # Lấy toàn bộ dữ liệu từ collection
-            results = self.chroma_client.collection.get()
+            # Lấy toàn bộ dữ liệu từ FAISS
+            results = self.faiss_client.get_all_documents()
 
             if not results or "documents" not in results or not results["documents"]:
                 logger.warning("Không có dữ liệu để khởi tạo BM25")
@@ -149,8 +149,8 @@ class HybridSearch:
             List[Dict[str, Any]]: Danh sách tài liệu kết quả
         """
         try:
-            # Gọi API từ ChromaDB
-            results = self.chroma_client.query_by_text(query, n_results=n_results)
+            # Tìm kiếm bằng FAISS
+            results = self.faiss_client.query_by_text(query, n_results=n_results)
 
             # Thêm thông tin nguồn
             for doc in results:

@@ -1,6 +1,4 @@
-"""
-Script để xử lý và nạp dữ liệu từ các file PDF vào ChromaDB.
-"""
+"""Script để xử lý và nạp dữ liệu từ các file PDF vào FAISS."""
 import os
 import logging
 import argparse
@@ -12,10 +10,10 @@ import sys
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from app.config import RAW_DATA_DIR, CHROMA_PERSIST_DIRECTORY, CHROMA_COLLECTION_NAME
-from app.utils.data_loader import load_all_pdfs, create_document_chunks
+from app.config import RAW_DATA_DIR, FAISS_INDEX_PATH
+from app.utils.data_loader import load_all_pdfs
 from app.utils.text_splitter import create_smart_chunks, enrich_chunks_with_metadata
-from app.vectordb.chroma_client import ChromaDBClient
+from app.vectordb.faiss_client import FaissDBClient
 
 # Cấu hình logging
 logging.basicConfig(
@@ -31,17 +29,15 @@ logger = logging.getLogger(__name__)
 
 
 def ingest_pdfs(input_dir: str = None,
-                persist_directory: str = CHROMA_PERSIST_DIRECTORY,
-                collection_name: str = CHROMA_COLLECTION_NAME,
+                index_path: str = FAISS_INDEX_PATH,
                 recreate: bool = False) -> None:
     """
-    Xử lý và nạp dữ liệu từ các file PDF vào ChromaDB.
+    Xử lý và nạp dữ liệu từ các file PDF vào FAISS.
 
     Args:
         input_dir (str, optional): Thư mục chứa các file PDF. Mặc định là RAW_DATA_DIR.
-        persist_directory (str, optional): Thư mục lưu dữ liệu ChromaDB. Mặc định là CHROMA_PERSIST_DIRECTORY.
-        collection_name (str, optional): Tên collection. Mặc định là CHROMA_COLLECTION_NAME.
-        recreate (bool, optional): Có tạo lại collection không. Mặc định là False.
+        index_path (str, optional): Đường dẫn lưu FAISS index. Mặc định là FAISS_INDEX_PATH.
+        recreate (bool, optional): Có tạo lại index không. Mặc định là False.
     """
     try:
         if input_dir is None:
@@ -49,20 +45,18 @@ def ingest_pdfs(input_dir: str = None,
 
         logger.info(f"Bắt đầu quá trình nạp dữ liệu từ {input_dir}")
 
-        # Khởi tạo client ChromaDB
-        chroma_client = ChromaDBClient(persist_directory, collection_name)
+        # Khởi tạo client FAISS
+        faiss_client = FaissDBClient(index_path)
 
-        # Nếu recreate và collection đã tồn tại, xóa collection cũ
+        # Nếu recreate và index đã tồn tại, xóa index cũ
         if recreate:
-            logger.info(f"Xóa collection cũ: {collection_name}")
-            chroma_client.delete_collection()
-
-            # Tạo lại client với collection mới
-            chroma_client = ChromaDBClient(persist_directory, collection_name)
+            logger.info("Xóa index cũ")
+            faiss_client.delete_index()
+            faiss_client = FaissDBClient(index_path)
 
         # Kiểm tra số lượng tài liệu đã có
-        stats = chroma_client.get_collection_stats()
-        logger.info(f"Thông tin collection hiện tại: {stats}")
+        stats = faiss_client.get_collection_stats()
+        logger.info(f"Thông tin index hiện tại: {stats}")
 
         # Đọc tất cả các file PDF
         pdf_files = load_all_pdfs(input_dir)
@@ -88,12 +82,12 @@ def ingest_pdfs(input_dir: str = None,
 
         logger.info(f"Đã tạo tổng cộng {len(all_chunks)} chunks từ {len(pdf_files)} file PDF")
 
-        # Thêm chunks vào ChromaDB
-        chroma_client.add_documents(all_chunks)
+        # Thêm chunks vào FAISS
+        faiss_client.add_documents(all_chunks)
 
         # Kiểm tra sau khi thêm
-        stats_after = chroma_client.get_collection_stats()
-        logger.info(f"Thông tin collection sau khi thêm: {stats_after}")
+        stats_after = faiss_client.get_collection_stats()
+        logger.info(f"Thông tin index sau khi thêm: {stats_after}")
 
         logger.info("Đã hoàn thành quá trình nạp dữ liệu thành công")
 
@@ -103,40 +97,32 @@ def ingest_pdfs(input_dir: str = None,
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Nạp dữ liệu PDF vào ChromaDB")
+    parser = argparse.ArgumentParser(description="Nạp dữ liệu PDF vào FAISS")
 
     parser.add_argument(
         "--input",
         type=str,
         default=None,
-        help="Thư mục chứa các file PDF"
+        help="Thư mục chứa các file PDF",
     )
 
     parser.add_argument(
-        "--persist-dir",
+        "--index",
         type=str,
-        default=CHROMA_PERSIST_DIRECTORY,
-        help="Thư mục lưu dữ liệu ChromaDB"
-    )
-
-    parser.add_argument(
-        "--collection",
-        type=str,
-        default=CHROMA_COLLECTION_NAME,
-        help="Tên collection trong ChromaDB"
+        default=FAISS_INDEX_PATH,
+        help="Đường dẫn lưu FAISS index",
     )
 
     parser.add_argument(
         "--recreate",
         action="store_true",
-        help="Xóa collection cũ nếu đã tồn tại"
+        help="Xóa index cũ nếu đã tồn tại",
     )
 
     args = parser.parse_args()
 
     ingest_pdfs(
         input_dir=args.input,
-        persist_directory=args.persist_dir,
-        collection_name=args.collection,
-        recreate=args.recreate
+        index_path=args.index,
+        recreate=args.recreate,
     )

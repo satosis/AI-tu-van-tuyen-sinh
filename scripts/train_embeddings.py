@@ -12,17 +12,12 @@ from typing import List, Dict, Any, Tuple
 from tqdm import tqdm
 from sentence_transformers import SentenceTransformer, InputExample, losses
 from torch.utils.data import DataLoader
-
-# Thêm đường dẫn gốc vào sys.path
 import sys
 
+# Thêm đường dẫn gốc vào sys.path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from app.config import EMBEDDING_MODEL
-from app.utils.data_loader import load_documents, create_document_chunks
-from app.utils.text_splitter import create_smart_chunks
-
-# Cấu hình logging
+# Cấu hình logging trước khi import các module có thể sử dụng logger
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -33,6 +28,10 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+
+from app.config import EMBEDDING_MODEL
+from app.utils.data_loader import load_documents
+from app.utils.text_splitter import create_smart_chunks
 
 
 def prepare_training_data(input_dir: str,
@@ -326,60 +325,59 @@ def main() -> None:
         "--data",
         type=str,
         required=True,
-        help="Thư mục chứa dữ liệu huấn luyện (các file PDF)"
+        help="Thư mục chứa dữ liệu huấn luyện (các file PDF)",
     )
 
     parser.add_argument(
         "--queries",
         type=str,
         default=None,
-        help="File JSON chứa các cặp câu hỏi-đáp"
+        help="File JSON chứa các cặp câu hỏi-đáp",
     )
 
     parser.add_argument(
         "--output",
         type=str,
         default="./trained_embeddings",
-        help="Thư mục lưu mô hình đã huấn luyện"
+        help="Thư mục lưu mô hình đã huấn luyện",
     )
 
     parser.add_argument(
         "--model",
         type=str,
         default=EMBEDDING_MODEL,
-        help="Tên mô hình cơ sở"
+        help="Tên mô hình cơ sở",
     )
 
     parser.add_argument(
         "--epochs",
         type=int,
         default=4,
-        help="Số epochs huấn luyện"
+        help="Số epochs huấn luyện",
     )
 
     parser.add_argument(
         "--batch-size",
         type=int,
         default=16,
-        help="Kích thước batch"
+        help="Kích thước batch",
     )
 
     parser.add_argument(
         "--lr",
         type=float,
         default=2e-5,
-        help="Tốc độ học"
+        help="Tốc độ học",
     )
 
     parser.add_argument(
         "--save-intermediate",
         action="store_true",
-        help="Lưu mô hình sau mỗi epoch"
+        help="Lưu mô hình sau mỗi epoch",
     )
 
     args = parser.parse_args()
 
-    # Huấn luyện mô hình
     train_embedding_model(
         data_dir=args.data,
         query_pairs_file=args.queries,
@@ -388,9 +386,10 @@ def main() -> None:
         epochs=args.epochs,
         batch_size=args.batch_size,
         learning_rate=args.lr,
-        save_intermediate=args.save_intermediate
+        save_intermediate=args.save_intermediate,
     )
 
 
 if __name__ == "__main__":
     main()
+

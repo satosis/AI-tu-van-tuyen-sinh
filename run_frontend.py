@@ -11,18 +11,19 @@ import sys
 
 sys.path.append(str(Path(__file__).resolve().parent))
 
+# Cấu hình logging trước khi import các module có thể sử dụng logger
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('frontend.log')
+    ]
+)
+
 from app.config import FRONTEND_PORT
 
 if __name__ == "__main__":
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.StreamHandler(),
-            logging.FileHandler('frontend.log')
-        ]
-    )
-
     print(f"Đang khởi động frontend tại http://localhost:{FRONTEND_PORT}")
 
     # Chạy ứng dụng Streamlit
@@ -35,3 +36,4 @@ if __name__ == "__main__":
         "--browser.serverAddress", "localhost",
         "--server.headless", "true"
     ])
+

@@ -4,28 +4,34 @@ import logging
 import argparse
 from pathlib import Path
 from typing import List, Dict, Any
-
-# Thêm đường dẫn gốc vào sys.path
 import sys
 
+# Thêm đường dẫn gốc vào sys.path
 sys.path.append(str(Path(__file__).resolve().parent.parent))
+
+# Đảm bảo luồng stdout/stderr sử dụng UTF-8 để tránh lỗi UnicodeEncodeError
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+except Exception:
+    pass
+
+# Cấu hình logging trước khi import các module có thể sử dụng logger
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout),
+        logging.FileHandler('ingest.log', encoding='utf-8')
+    ]
+)
+
+logger = logging.getLogger(__name__)
 
 from app.config import RAW_DATA_DIR, FAISS_INDEX_PATH
 from app.utils.data_loader import load_documents
 from app.utils.text_splitter import create_smart_chunks, enrich_chunks_with_metadata
 from app.vectordb.faiss_client import FaissDBClient
-
-# Cấu hình logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler('ingest.log')
-    ]
-)
-
-logger = logging.getLogger(__name__)
 
 
 def ingest_documents(input_dir: str = None,

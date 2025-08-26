@@ -10,8 +10,16 @@ from flask import Flask, request, jsonify
 
 try:
     from flask_cors import CORS
-except ImportError:
-    CORS = None
+except ModuleNotFoundError:
+    class CORS:  # pragma: no cover - used when flask-cors isn't installed
+        def __init__(self, app: Flask | None = None, *args, **kwargs):
+            if app is not None:
+                self.init_app(app)
+
+        def init_app(self, app: Flask) -> Flask:
+            logging.getLogger(__name__).warning(
+                "`flask-cors` is not installed; CORS support disabled.")
+            return app
 
 # Thêm đường dẫn gốc vào sys.path
 import sys

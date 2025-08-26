@@ -8,6 +8,7 @@ try:
     from langchain_huggingface import HuggingFaceEmbeddings
 except ImportError:  # pragma: no cover - fallback for older installs
     from langchain_community.embeddings import HuggingFaceEmbeddings
+
 from sentence_transformers import SentenceTransformer
 
 from app.config import EMBEDDING_MODEL

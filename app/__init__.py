@@ -27,6 +27,7 @@ logging_config = {
             'formatter': 'standard',
             'filename': 'app.log',
             'mode': 'a',
+            'encoding': 'utf-8',
         }
     },
     'loggers': {

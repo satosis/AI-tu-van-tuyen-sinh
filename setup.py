@@ -47,6 +47,9 @@ setup(
         "typing-extensions==4.7.1",
         "pydantic==2.7.4",
     ],
+    extras_require={
+        "cors": ["flask-cors"],
+    },
     entry_points={
         "console_scripts": [
             "run-backend=run_backend:main",

@@ -4,7 +4,10 @@ Module mô hình embedding cho việc chuyển đổi văn bản thành vector.
 import logging
 from typing import List, Union
 
-from langchain_community.embeddings import HuggingFaceEmbeddings
+try:
+    from langchain_huggingface import HuggingFaceEmbeddings
+except ImportError:  # pragma: no cover - fallback for older installs
+    from langchain_community.embeddings import HuggingFaceEmbeddings
 from sentence_transformers import SentenceTransformer
 
 from app.config import EMBEDDING_MODEL
@@ -86,12 +89,7 @@ _embedding_model_instance = None
 
 
 def get_embedding_model() -> EmbeddingModel:
-    """
-    Trả về instance singleton của mô hình embedding.
-
-    Returns:
-        EmbeddingModel: Instance mô hình embedding
-    """
+    """Trả về instance singleton của mô hình embedding."""
     global _embedding_model_instance
 
     if _embedding_model_instance is None:

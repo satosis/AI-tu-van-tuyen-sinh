@@ -66,7 +66,7 @@ class SemanticRouter:
                 rag_result = self.rag_pipeline.process(query, evaluate=evaluate)
 
                 # Thu thập thông tin nguồn từ các tài liệu được truy xuất
-                sources = []
+                sources = ["RAG"]
                 for doc in rag_result.get("context", []):
                     src = doc.get("metadata", {}).get("source")
                     if src and src not in sources:

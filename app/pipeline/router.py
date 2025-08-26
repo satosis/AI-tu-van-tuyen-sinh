@@ -65,12 +65,20 @@ class SemanticRouter:
                 logger.info("Sử dụng RAG để trả lời")
                 rag_result = self.rag_pipeline.process(query, evaluate=evaluate)
 
+                # Thu thập thông tin nguồn từ các tài liệu được truy xuất
+                sources = []
+                for doc in rag_result.get("context", []):
+                    src = doc.get("metadata", {}).get("source")
+                    if src and src not in sources:
+                        sources.append(src)
+
                 # Gộp kết quả
                 result.update({
                     "answer": rag_result["answer"],
                     "context": rag_result.get("context", []),
                     "evaluation": rag_result.get("evaluation"),
-                    "source": "RAG"
+                    "source": "RAG",
+                    "sources": sources
                 })
 
             else:  # LLM
@@ -83,7 +91,8 @@ class SemanticRouter:
                     "answer": answer,
                     "context": [],
                     "evaluation": None,
-                    "source": "LLM"
+                    "source": "LLM",
+                    "sources": []
                 })
 
             logger.info(f"Đã định tuyến và xử lý thành công câu hỏi: {query}")
@@ -102,6 +111,7 @@ class SemanticRouter:
                 "evaluation": None,
                 "route": "ERROR",
                 "source": "ERROR",
+                "sources": [],
                 "error": str(e)
             }
 

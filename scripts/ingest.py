@@ -10,12 +10,19 @@ import sys
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
+# Đảm bảo luồng stdout/stderr sử dụng UTF-8 để tránh lỗi UnicodeEncodeError
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+except Exception:
+    pass
+
 # Cấu hình logging trước khi import các module có thể sử dụng logger
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.StreamHandler(),
+        logging.StreamHandler(sys.stdout),
         logging.FileHandler('ingest.log', encoding='utf-8')
     ]
 )

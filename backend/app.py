@@ -15,6 +15,13 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
+# Đảm bảo luồng stdout/stderr sử dụng UTF-8 để tránh lỗi UnicodeEncodeError trên Windows
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+except Exception:
+    pass
+
 from app.config import BACKEND_HOST, BACKEND_PORT
 from app.pipeline.router import get_semantic_router
 from app.pipeline.reflection import get_reflection
@@ -22,15 +29,16 @@ from app.vectordb.faiss_client import get_faiss_client
 from app.models.llm import get_llm_model
 from app.models.evaluation import get_evaluation_model
 
-# Cấu hình logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler('backend.log')
-    ]
-)
+# Cấu hình logging nếu chưa có handler nào
+if not logging.getLogger().handlers:
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.StreamHandler(sys.stdout),
+            logging.FileHandler('backend.log', encoding='utf-8')
+        ]
+    )
 
 logger = logging.getLogger(__name__)
 

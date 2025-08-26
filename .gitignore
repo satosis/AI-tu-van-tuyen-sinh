@@ -36,3 +36,4 @@ dist/
 
 # Tệp database của SQLite (nếu có)
 *.sqlite3
+node_modules

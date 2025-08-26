@@ -6,10 +6,13 @@ from typing import List, Union
 
 try:
     from langchain_huggingface import HuggingFaceEmbeddings
-except ImportError as e:  # pragma: no cover - requires explicit install
-    raise ImportError(
-        "`langchain_huggingface` is required. Install via `pip install langchain-huggingface`.",
-    ) from e
+except ImportError:
+    try:  # pragma: no cover - only used when optional dependency missing
+        from langchain_community.embeddings import HuggingFaceEmbeddings
+    except ImportError as e:  # pragma: no cover - requires explicit install
+        raise ImportError(
+            "`langchain_huggingface` is required. Install via `pip install langchain-huggingface`."
+        ) from e
 from sentence_transformers import SentenceTransformer
 
 from app.config import EMBEDDING_MODEL

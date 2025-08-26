@@ -56,7 +56,8 @@ logger = logging.getLogger(__name__)
 
 # Khởi tạo ứng dụng Flask
 app = Flask(__name__)
-CORS(app)  # Cho phép CORS
+if CORS:
+    CORS(app)  # Cho phép CORS khi thư viện có sẵn
 
 # Khởi tạo các thành phần cần thiết
 # Các thành phần sẽ được lazy loading khi gọi API

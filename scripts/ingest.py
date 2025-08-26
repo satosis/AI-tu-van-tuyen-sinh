@@ -10,12 +10,7 @@ import sys
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from app.config import RAW_DATA_DIR, FAISS_INDEX_PATH
-from app.utils.data_loader import load_documents
-from app.utils.text_splitter import create_smart_chunks, enrich_chunks_with_metadata
-from app.vectordb.faiss_client import FaissDBClient
-
-# Cấu hình logging
+# Cấu hình logging trước khi import các module có thể sử dụng logger
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -26,6 +21,11 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+
+from app.config import RAW_DATA_DIR, FAISS_INDEX_PATH
+from app.utils.data_loader import load_documents
+from app.utils.text_splitter import create_smart_chunks, enrich_chunks_with_metadata
+from app.vectordb.faiss_client import FaissDBClient
 
 
 def ingest_documents(input_dir: str = None,
@@ -126,3 +126,4 @@ if __name__ == "__main__":
         index_path=args.index,
         recreate=args.recreate,
     )
+

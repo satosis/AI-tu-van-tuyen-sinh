@@ -1,6 +1,7 @@
 # Core frameworks
 streamlit
 flask
+flask-cors
 gunicorn
 
 # LangChain và các thành phần

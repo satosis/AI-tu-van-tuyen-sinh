@@ -2,6 +2,7 @@ pip install langchain_groq
 pip install faiss-cpu
 pip install scikit-learn
 pip install langchain
+pip install flask-cors
 pip install flask
 pip install .[cors]  # Optional: enable CORS support
 pip install langchain_community

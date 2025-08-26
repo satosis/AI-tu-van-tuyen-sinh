@@ -7,13 +7,32 @@ import traceback
 from typing import Dict, Any, List
 
 from flask import Flask, request, jsonify
-from flask_cors import CORS
+
+try:
+    from flask_cors import CORS
+except ModuleNotFoundError:
+    class CORS:  # pragma: no cover - used when flask-cors isn't installed
+        def __init__(self, app: Flask | None = None, *args, **kwargs):
+            if app is not None:
+                self.init_app(app)
+
+        def init_app(self, app: Flask) -> Flask:
+            logging.getLogger(__name__).warning(
+                "`flask-cors` is not installed; CORS support disabled.")
+            return app
 
 # Thêm đường dẫn gốc vào sys.path
 import sys
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
+
+# Đảm bảo luồng stdout/stderr sử dụng UTF-8 để tránh lỗi UnicodeEncodeError trên Windows
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+except Exception:
+    pass
 
 from app.config import BACKEND_HOST, BACKEND_PORT
 from app.pipeline.router import get_semantic_router
@@ -22,15 +41,16 @@ from app.vectordb.faiss_client import get_faiss_client
 from app.models.llm import get_llm_model
 from app.models.evaluation import get_evaluation_model
 
-# Cấu hình logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler('backend.log')
-    ]
-)
+# Cấu hình logging nếu chưa có handler nào
+if not logging.getLogger().handlers:
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.StreamHandler(sys.stdout),
+            logging.FileHandler('backend.log', encoding='utf-8')
+        ]
+    )
 
 logger = logging.getLogger(__name__)
 

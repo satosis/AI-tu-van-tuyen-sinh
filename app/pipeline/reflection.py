@@ -81,7 +81,8 @@ class Reflection:
             admission_keywords = [
                 'tuyển sinh', 'ngành', 'điểm', 'điểm chuẩn', 'học phí', 'học bổng',
                 'đại học', 'cao đẳng', 'đào tạo', 'trường', 'khoa', 'ngành học',
-                'chuyên ngành', 'thi', 'xét tuyển', 'hồ sơ', 'nộp', 'đơn', 'đăng ký'
+                'chuyên ngành', 'thi', 'xét tuyển', 'hồ sơ', 'nộp', 'đơn', 'đăng ký',
+                'thư viện', 'cơ sở vật chất', 'phòng'
             ]
 
             found_keywords = [keyword for keyword in admission_keywords if keyword.lower() in query.lower()]

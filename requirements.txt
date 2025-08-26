@@ -1,11 +1,13 @@
 # Core frameworks
 streamlit
 flask
+flask-cors
 gunicorn
 
 # LangChain và các thành phần
 langchain
 langchain-community
+langchain-huggingface
 langchain-groq
 langchain-text-splitters
 

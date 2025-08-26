@@ -38,3 +38,7 @@ pillow
 tornado
 typing-extensions
 pydantic
+
+# Optional dependencies
+# To enable CORS support, install with the 'cors' extra:
+# pip install .[cors]

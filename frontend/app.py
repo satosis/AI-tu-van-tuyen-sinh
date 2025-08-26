@@ -672,7 +672,10 @@ def display_chat_history() -> None:
             ''', unsafe_allow_html=True)
 
             # Hiển thị thông tin nguồn nếu có
-            if "source" in message and message["source"] != "LLM":
+            if "sources" in message and message["sources"]:
+                sources_str = ", ".join(message["sources"])
+                st.markdown(f'<div class="source-info">Nguồn: {sources_str}</div>', unsafe_allow_html=True)
+            elif "source" in message and message["source"] != "LLM":
                 st.markdown(f'<div class="source-info">Nguồn: {message["source"]}</div>', unsafe_allow_html=True)
 
             st.markdown('</div>', unsafe_allow_html=True)
@@ -722,6 +725,7 @@ def handle_user_input() -> None:
                 "content": response.get("answer", "Xin lỗi, không có câu trả lời."),
                 "time": current_time,
                 "source": response.get("source", "Unknown"),
+                "sources": response.get("sources", []),
                 "context": response.get("context", []),
                 "evaluation": response.get("evaluation", None)
             }

@@ -3,7 +3,6 @@ Module mô hình embedding cho việc chuyển đổi văn bản thành vector.
 """
 import logging
 from typing import List, Union
-
 try:
     from langchain_huggingface import HuggingFaceEmbeddings
 except ImportError:

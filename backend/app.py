@@ -7,7 +7,10 @@ import traceback
 from typing import Dict, Any, List
 
 from flask import Flask, request, jsonify
-from flask_cors import CORS
+try:
+    from flask_cors import CORS
+except ImportError:
+    CORS = None
 
 # Thêm đường dẫn gốc vào sys.path
 import sys
@@ -36,7 +39,8 @@ logger = logging.getLogger(__name__)
 
 # Khởi tạo ứng dụng Flask
 app = Flask(__name__)
-CORS(app)  # Cho phép CORS
+if CORS:
+    CORS(app)  # Cho phép CORS khi thư viện có sẵn
 
 # Khởi tạo các thành phần cần thiết
 # Các thành phần sẽ được lazy loading khi gọi API

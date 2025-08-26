@@ -61,8 +61,8 @@ Hãy phân tích câu hỏi sau đây và xác định liệu nó có liên quan
 
 Câu hỏi: {question}
 
-Nếu câu hỏi liên quan đến thông tin tuyển sinh (như điểm chuẩn, ngành học, chương trình đào tạo, học phí, học bổng, ký túc xá, quy trình nhập học),
-hãy trả về "RAG". Nếu câu hỏi là chào hỏi thông thường hoặc không liên quan đến thông tin tụ vấn tuyển sinh, hãy trả về "LLM".
+Nếu câu hỏi liên quan đến thông tin tuyển sinh (như điểm chuẩn, ngành học, chương trình đào tạo, học phí, học bổng, ký túc xá, thư viện, cơ sở vật chất, quy trình nhập học),
+hãy trả về "RAG". Nếu câu hỏi là chào hỏi thông thường hoặc không liên quan đến thông tin tư vấn tuyển sinh, hãy trả về "LLM".
 
 Trả lời chỉ "RAG" hoặc "LLM":
 """

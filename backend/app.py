@@ -7,6 +7,7 @@ import traceback
 from typing import Dict, Any, List
 
 from flask import Flask, request, jsonify
+
 try:
     from flask_cors import CORS
 except ImportError:

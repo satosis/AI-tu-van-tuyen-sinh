@@ -15,11 +15,7 @@ import sys
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from app.config import EVAL_METRICS
-from app.pipeline.router import get_semantic_router
-from app.models.evaluation import get_evaluation_model
-
-# Cấu hình logging
+# Cấu hình logging trước khi import các module có thể sử dụng logger
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -30,6 +26,10 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+
+from app.config import EVAL_METRICS
+from app.pipeline.router import get_semantic_router
+from app.models.evaluation import get_evaluation_model
 
 
 def load_test_questions(file_path: str) -> List[Dict[str, Any]]:
@@ -304,3 +304,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

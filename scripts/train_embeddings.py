@@ -18,11 +18,7 @@ import sys
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from app.config import EMBEDDING_MODEL
-from app.utils.data_loader import load_documents, create_document_chunks
-from app.utils.text_splitter import create_smart_chunks
-
-# Cấu hình logging
+# Cấu hình logging trước khi import các module có thể sử dụng logger
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -33,6 +29,10 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+
+from app.config import EMBEDDING_MODEL
+from app.utils.data_loader import load_documents, create_document_chunks
+from app.utils.text_splitter import create_smart_chunks
 
 
 def prepare_training_data(input_dir: str,
@@ -394,3 +394,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

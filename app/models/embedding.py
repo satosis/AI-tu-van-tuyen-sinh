@@ -4,7 +4,7 @@ Module mô hình embedding cho việc chuyển đổi văn bản thành vector.
 import logging
 from typing import List, Union
 
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from sentence_transformers import SentenceTransformer
 
 from app.config import EMBEDDING_MODEL

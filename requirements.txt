@@ -9,6 +9,7 @@ langchain-community
 langchain-huggingface
 langchain-groq
 langchain-text-splitters
+langchain-huggingface
 
 # Vector database
 faiss-cpu

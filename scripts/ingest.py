@@ -1,4 +1,4 @@
-"""Script để xử lý và nạp dữ liệu từ các file PDF vào FAISS."""
+"""Script để xử lý và nạp dữ liệu từ các tài liệu vào FAISS."""
 import os
 import logging
 import argparse
@@ -11,7 +11,7 @@ import sys
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from app.config import RAW_DATA_DIR, FAISS_INDEX_PATH
-from app.utils.data_loader import load_all_pdfs
+from app.utils.data_loader import load_documents
 from app.utils.text_splitter import create_smart_chunks, enrich_chunks_with_metadata
 from app.vectordb.faiss_client import FaissDBClient
 
@@ -28,14 +28,14 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def ingest_pdfs(input_dir: str = None,
-                index_path: str = FAISS_INDEX_PATH,
-                recreate: bool = False) -> None:
+def ingest_documents(input_dir: str = None,
+                     index_path: str = FAISS_INDEX_PATH,
+                     recreate: bool = False) -> None:
     """
-    Xử lý và nạp dữ liệu từ các file PDF vào FAISS.
+    Xử lý và nạp dữ liệu từ các tài liệu vào FAISS.
 
     Args:
-        input_dir (str, optional): Thư mục chứa các file PDF. Mặc định là RAW_DATA_DIR.
+        input_dir (str, optional): Thư mục chứa các tài liệu. Mặc định là RAW_DATA_DIR.
         index_path (str, optional): Đường dẫn lưu FAISS index. Mặc định là FAISS_INDEX_PATH.
         recreate (bool, optional): Có tạo lại index không. Mặc định là False.
     """
@@ -58,18 +58,18 @@ def ingest_pdfs(input_dir: str = None,
         stats = faiss_client.get_collection_stats()
         logger.info(f"Thông tin index hiện tại: {stats}")
 
-        # Đọc tất cả các file PDF
-        pdf_files = load_all_pdfs(input_dir)
-        if not pdf_files:
-            logger.warning(f"Không tìm thấy file PDF trong thư mục {input_dir}")
+        # Đọc tất cả các tài liệu
+        documents = load_documents(input_dir)
+        if not documents:
+            logger.warning(f"Không tìm thấy tài liệu trong thư mục {input_dir}")
             return
 
-        logger.info(f"Đã đọc {len(pdf_files)} file PDF")
+        logger.info(f"Đã đọc {len(documents)} tài liệu")
 
         # Xử lý từng file và tạo chunks
         all_chunks = []
 
-        for file_name, content in pdf_files.items():
+        for file_name, content in documents.items():
             logger.info(f"Đang xử lý file: {file_name}")
 
             # Tạo chunks thông minh
@@ -80,7 +80,7 @@ def ingest_pdfs(input_dir: str = None,
 
             all_chunks.extend(enriched_chunks)
 
-        logger.info(f"Đã tạo tổng cộng {len(all_chunks)} chunks từ {len(pdf_files)} file PDF")
+        logger.info(f"Đã tạo tổng cộng {len(all_chunks)} chunks từ {len(documents)} tài liệu")
 
         # Thêm chunks vào FAISS
         faiss_client.add_documents(all_chunks)
@@ -97,13 +97,13 @@ def ingest_pdfs(input_dir: str = None,
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Nạp dữ liệu PDF vào FAISS")
+    parser = argparse.ArgumentParser(description="Nạp dữ liệu tài liệu vào FAISS")
 
     parser.add_argument(
         "--input",
         type=str,
         default=None,
-        help="Thư mục chứa các file PDF",
+        help="Thư mục chứa các tài liệu",
     )
 
     parser.add_argument(
@@ -121,7 +121,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    ingest_pdfs(
+    ingest_documents(
         input_dir=args.input,
         index_path=args.index,
         recreate=args.recreate,

@@ -19,7 +19,7 @@ import sys
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from app.config import EMBEDDING_MODEL
-from app.utils.data_loader import load_all_pdfs, create_document_chunks
+from app.utils.data_loader import load_documents, create_document_chunks
 from app.utils.text_splitter import create_smart_chunks
 
 # Cấu hình logging
@@ -39,10 +39,10 @@ def prepare_training_data(input_dir: str,
                           query_pairs_file: str = None,
                           output_file: str = None) -> List[Dict[str, Any]]:
     """
-    Chuẩn bị dữ liệu huấn luyện từ các file PDF và cặp query.
+    Chuẩn bị dữ liệu huấn luyện từ các tài liệu và cặp query.
 
     Args:
-        input_dir (str): Thư mục chứa các file PDF
+        input_dir (str): Thư mục chứa các tài liệu
         query_pairs_file (str, optional): File chứa các cặp câu hỏi-đáp. Mặc định là None.
         output_file (str, optional): File để lưu dữ liệu đã chuẩn bị. Mặc định là None.
 
@@ -52,20 +52,20 @@ def prepare_training_data(input_dir: str,
     try:
         logger.info(f"Đang chuẩn bị dữ liệu huấn luyện từ thư mục: {input_dir}")
 
-        # Tải và xử lý các file PDF
-        pdf_files = load_all_pdfs(input_dir)
+        # Tải và xử lý các tài liệu
+        documents = load_documents(input_dir)
 
-        if not pdf_files:
-            logger.warning(f"Không tìm thấy file PDF nào trong thư mục {input_dir}")
+        if not documents:
+            logger.warning(f"Không tìm thấy tài liệu nào trong thư mục {input_dir}")
             return []
 
-        logger.info(f"Đã tải {len(pdf_files)} file PDF")
+        logger.info(f"Đã tải {len(documents)} tài liệu")
 
         # Tạo chunks từ các file PDF
         all_chunks = []
 
-        for file_name, content in pdf_files.items():
-            logger.info(f"Đang xử lý file: {file_name}")
+        for file_name, content in documents.items():
+            logger.info(f"Đang xử lý tài liệu: {file_name}")
             chunks = create_smart_chunks(content)
 
             for chunk in chunks:
@@ -74,7 +74,7 @@ def prepare_training_data(input_dir: str,
                     "source": file_name
                 })
 
-        logger.info(f"Đã tạo {len(all_chunks)} chunks từ các file PDF")
+        logger.info(f"Đã tạo {len(all_chunks)} chunks từ các tài liệu")
 
         # Tải các cặp câu hỏi-đáp nếu có
         query_pairs = []

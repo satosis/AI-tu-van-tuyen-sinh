@@ -343,7 +343,7 @@ def send_chat_message(query: str, evaluate: bool = False) -> Dict[str, Any]:
         response = requests.post(
             f"{BACKEND_URL}/chat",
             json={"query": query, "evaluate": evaluate},
-            timeout=30
+            timeout=60
         )
 
         response.raise_for_status()
@@ -364,7 +364,9 @@ def get_index_stats() -> Dict[str, Any]:
         Dict[str, Any]: Thông tin thống kê
     """
     try:
-        response = requests.get(f"{BACKEND_URL}/collection/stats", timeout=5)
+        # Timeout dài để chịu được lần khởi tạo nguội đầu tiên của backend
+        # (nạp model embedding + khởi tạo pipeline có thể mất vài chục giây).
+        response = requests.get(f"{BACKEND_URL}/collection/stats", timeout=60)
         response.raise_for_status()
         return response.json()
 
@@ -693,6 +695,43 @@ def display_chat_history() -> None:
 
     st.markdown('</div>', unsafe_allow_html=True)
 
+def process_pending_query() -> None:
+    """
+    Xử lý câu hỏi đang chờ (đã hiển thị tin nhắn người dùng, cần gọi backend).
+    """
+    pending = st.session_state.get("pending_query")
+    if not pending:
+        return
+
+    with st.spinner("Đang xử lý câu hỏi của bạn..."):
+        # Gửi câu hỏi đến backend
+        response = send_chat_message(pending, evaluate=st.session_state.evaluate_answers)
+
+    # Xóa trạng thái chờ dù thành công hay lỗi để tránh lặp vô hạn
+    st.session_state.pending_query = None
+
+    if "error" in response:
+        message = {
+            "role": "assistant",
+            "content": f"⚠️ Lỗi: {response['error']}",
+            "time": datetime.now().strftime("%H:%M:%S"),
+        }
+    else:
+        message = {
+            "role": "assistant",
+            "content": response.get("answer", "Xin lỗi, không có câu trả lời."),
+            "time": datetime.now().strftime("%H:%M:%S"),
+            "source": response.get("source", "Unknown"),
+            "sources": response.get("sources", []),
+            "context": response.get("context", []),
+            "evaluation": response.get("evaluation", None)
+        }
+
+    st.session_state.messages.append(message)
+
+    # Render lại để hiển thị câu trả lời
+    st.rerun()
+
 def handle_user_input() -> None:
     """
     Xử lý input từ người dùng.
@@ -701,39 +740,16 @@ def handle_user_input() -> None:
 
     if query:
         # Thêm tin nhắn của người dùng vào lịch sử
-        current_time = datetime.now().strftime("%H:%M:%S")
-
         st.session_state.messages.append({
             "role": "user",
             "content": query,
-            "time": current_time
+            "time": datetime.now().strftime("%H:%M:%S")
         })
 
-        with st.spinner("Đang xử lý câu hỏi của bạn..."):
-            # Gửi câu hỏi đến backend
-            response = send_chat_message(query, evaluate=st.session_state.evaluate_answers)
-
-            if "error" in response:
-                st.error(f"Lỗi: {response['error']}")
-                return
-
-            # Thêm câu trả lời vào lịch sử
-            current_time = datetime.now().strftime("%H:%M:%S")
-
-            message = {
-                "role": "assistant",
-                "content": response.get("answer", "Xin lỗi, không có câu trả lời."),
-                "time": current_time,
-                "source": response.get("source", "Unknown"),
-                "sources": response.get("sources", []),
-                "context": response.get("context", []),
-                "evaluation": response.get("evaluation", None)
-            }
-
-            st.session_state.messages.append(message)
-
-        # Hiển thị lịch sử chat
-        display_chat_history()
+        # Đánh dấu câu hỏi cần xử lý và render lại ngay để tin nhắn
+        # người dùng hiển thị tức thì (trước khi chờ backend trả lời).
+        st.session_state.pending_query = query
+        st.rerun()
 
 def main() -> None:
     """
@@ -749,10 +765,13 @@ def main() -> None:
     st.markdown('<h1 class="main-header">🎓 Chatbot Tư Vấn Tuyển Sinh</h1>', unsafe_allow_html=True)
     st.markdown('<p class="sub-header">Hỏi đáp thông tin tuyển sinh với công nghệ AI</p>', unsafe_allow_html=True)
 
-    # Hiển thị lịch sử chat
+    # Hiển thị lịch sử chat (bao gồm tin nhắn người dùng vừa gửi)
     display_chat_history()
 
-    # Xử lý input
+    # Nếu có câu hỏi đang chờ, gọi backend (spinner hiển thị dưới tin nhắn)
+    process_pending_query()
+
+    # Xử lý input mới
     handle_user_input()
 
 if __name__ == "__main__":

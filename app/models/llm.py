@@ -5,9 +5,8 @@ import logging
 from typing import Dict, List, Any, Optional
 
 from langchain_groq import ChatGroq
-from langchain.schema import AIMessage, HumanMessage, SystemMessage
-from langchain.chains import LLMChain
-from langchain.prompts import PromptTemplate
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+from langchain_core.prompts import PromptTemplate
 
 from app.config import GROQ_API_KEY, LLM_MODEL, TEMPERATURE, SYSTEM_PROMPT, REFLECTION_PROMPT
 
@@ -86,10 +85,10 @@ class LLMModel:
                     input_variables=["context", "question"]
                 )
 
-                chain = LLMChain(llm=self.llm, prompt=prompt)
+                chain = prompt | self.llm
 
                 result = chain.invoke({"context": context, "question": question})
-                return result["text"]
+                return result.content
 
             # Nếu không có ngữ cảnh, trả lời dựa trên kiến thức sẵn có
             else:
@@ -124,10 +123,10 @@ class LLMModel:
                 input_variables=["question"]
             )
 
-            chain = LLMChain(llm=self.llm, prompt=prompt)
+            chain = prompt | self.llm
 
             result = chain.invoke({"question": question})
-            return result["text"].strip()
+            return result.content.strip()
 
         except Exception as e:
             logger.error(f"Lỗi khi phân tích câu hỏi: {str(e)}")

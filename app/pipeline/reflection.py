@@ -7,8 +7,7 @@ import json
 from typing import Dict, Any
 
 from app.models.llm import get_llm_model
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
+from langchain_core.prompts import PromptTemplate
 
 logger = logging.getLogger(__name__)
 
@@ -130,10 +129,10 @@ class Reflection:
                 input_variables=["question"]
             )
 
-            chain = LLMChain(llm=self.llm.llm, prompt=prompt)
+            chain = prompt | self.llm.llm
 
             result = chain.invoke({"question": query})
-            result_text = result["text"]
+            result_text = result.content
 
             # Trích xuất phần JSON từ kết quả
             json_match = re.search(r'```json\s*(.*?)\s*```', result_text, re.DOTALL)

@@ -5,8 +5,7 @@ import logging
 from typing import Dict, List, Any
 
 from langchain_groq import ChatGroq
-from langchain.chains import LLMChain
-from langchain.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate
 
 from app.config import GROQ_API_KEY, LLM_MODEL, EVAL_METRICS
 from app.models.embedding import get_embedding_model
@@ -119,7 +118,7 @@ class EvaluationModel:
                 input_variables=["question", "context", "answer"]
             )
 
-            chain = LLMChain(llm=self.llm, prompt=prompt)
+            chain = prompt | self.llm
 
             result = chain.invoke({
                 "question": question,
@@ -132,7 +131,7 @@ class EvaluationModel:
             eval_result = {}
 
             try:
-                eval_result = json.loads(result["text"])
+                eval_result = json.loads(result.content)
                 # Thêm độ tương đồng ngữ nghĩa vào kết quả
                 eval_result["semantic_similarity"] = similarity
 

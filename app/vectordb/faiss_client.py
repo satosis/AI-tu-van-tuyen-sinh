@@ -21,7 +21,13 @@ class FaissDBClient:
         self.index_path = index_path
         self.metadata_path = f"{index_path}.pkl"
         self.embedding_model = get_embedding_model()
-        self.dimension = self.embedding_model.st_model.get_sentence_embedding_dimension()
+        # get_sentence_embedding_dimension() đã đổi tên thành get_embedding_dimension();
+        # dùng tên mới nếu có, fallback về tên cũ để tương thích ngược.
+        st_model = self.embedding_model.st_model
+        if hasattr(st_model, "get_embedding_dimension"):
+            self.dimension = st_model.get_embedding_dimension()
+        else:
+            self.dimension = st_model.get_sentence_embedding_dimension()
 
         if os.path.exists(self.index_path) and os.path.exists(self.metadata_path):
             logger.info("Loading existing FAISS index from disk")

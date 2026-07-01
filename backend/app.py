@@ -96,6 +96,17 @@ def lazy_init() -> None:
         raise
 
 
+def lazy_init_faiss() -> None:
+    """
+    Khởi tạo lười chỉ FAISS client (nhẹ hơn lazy_init đầy đủ), dùng cho
+    endpoint chỉ cần truy vấn thông tin index như /collection/stats.
+    """
+    global faiss_client
+
+    if faiss_client is None:
+        faiss_client = get_faiss_client()
+
+
 @app.route('/api/health', methods=['GET'])
 def health_check() -> Dict[str, Any]:
     """
@@ -165,8 +176,8 @@ def get_index_stats() -> Dict[str, Any]:
         Dict[str, Any]: Thông tin thống kê
     """
     try:
-        # Khởi tạo lười các thành phần
-        lazy_init()
+        # Chỉ cần FAISS client cho endpoint này (không cần LLM/evaluator)
+        lazy_init_faiss()
 
         # Lấy thông tin thống kê
         stats = faiss_client.get_collection_stats()
